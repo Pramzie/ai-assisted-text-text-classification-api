@@ -66,8 +66,7 @@ cp .env.example .env
 | `AI_MODEL`    | Model name exactly as the provider lists it                                 | `gemini-2.5-flash-lite`                                   |
 | `PORT`        | Port for the server (optional, defaults to `3000`)                          | `3000`                                                    |
 
-> The server refuses to start if `AI_API_KEY`, `AI_BASE_URL` or `AI_MODEL` is missing.
-> Never commit your real `.env` file. It is listed in `.gitignore`.
+
 
 ### Run
 
@@ -75,7 +74,7 @@ cp .env.example .env
 node server.js
 ```
 
-You should see:
+In bash or terminal, we will see:
 
 ```
 Text Classification API running on http://localhost:3000
@@ -101,15 +100,9 @@ Content-Type: application/json
 |--------|--------|----------|---------------------|
 | `text` | string | yes      | The text to classify |
 
-**Example request (curl)**
+**Example request and responses in Postman**
 
-```bash
-curl -X POST http://localhost:3000/api/classify \
-  -H "Content-Type: application/json" \
-  -d '{"text": "My order arrived broken!"}'
-```
-
-**Example response (`200 OK`)**
+![alt text](POST_screenshot.png)
 
 ```json
 {
@@ -120,7 +113,7 @@ curl -X POST http://localhost:3000/api/classify \
 
 The `confidence` value comes from the model and will vary between texts and models.
 
-**More examples**
+**examples**
 
 | Input text                          | Expected category |
 |-------------------------------------|-------------------|
@@ -132,11 +125,13 @@ The `confidence` value comes from the model and will vary between texts and mode
 ### `GET /health`
 
 Simple health check. Returns `{ "status": "ok" }`.
+![alt text](GET_screenshot.png)
 
 ### Error responses
 
 All errors return JSON in the form `{ "error": "<message>" }`.
-
+![alt text](error_screenshot.png)
+The above error was fixed by changing the model.
 | Status | When it happens                                                        |
 |--------|------------------------------------------------------------------------|
 | 400    | Invalid JSON body, or `text` is missing or not a valid string          |
@@ -150,13 +145,10 @@ Request bodies are limited to **10 KB**.
 
 ## How AI Was Used
 
-The classification itself is done by an AI model. The service does not use keyword rules. Its job is to give the model clear instructions and make the model's output reliable.
+The classification itself is done by an AI model.T
 
-### 1. Prompt design
-
-The service sends two messages to the model's chat completions endpoint:
-
-- **System prompt:** defines the four categories and what each one means, and tells the model to answer with *only* a JSON object:
+The service sends two messages to the model's chat completions endpoint
+The prompt defines the four categories and what each one means, and tells the model to answer with only a JSON object:
 
   ```json
   {"category": "<Complaint|Query|Feedback|Other>", "confidence": <number between 0 and 1>}
@@ -169,50 +161,11 @@ The service sends two messages to the model's chat completions endpoint:
   | Feedback  | The sender shares an opinion, praise or a suggestion, with no problem or question |
   | Other     | Anything that does not fit the above                                        |
 
-- **User message:** the input wrapped as `<text>...</text>`.
+Since AI replies can be messy the service validates them before returning.
+It extracts the JSON object from the model's reply and the model's own confidence is used when it is a valid number. If it is missing or invalid, a default of `0.5` is used. The value is clamped to the range 0 to 1 and rounded to two decimals.
 
-Design choices:
 
-- **`temperature: 0`** so the same input gives consistent results.
-- **Delimiters and a data-only instruction:** the user's text is wrapped in `<text>` tags and the model is told to treat it purely as data and never follow instructions inside it. This reduces prompt-injection risk.
-- **Strict JSON-only output** so the reply can be parsed by code.
 
-### 2. Output handling
-
-AI replies can be messy, so the service validates them before returning:
-
-1. **Parse:** extracts the JSON object from the model's reply.
-2. **Category:** matched case-insensitively against the four allowed values. Anything unrecognised becomes `Other`.
-3. **Confidence mapping:** the model's own confidence is used when it is a valid number. If it is missing or invalid, a default of `0.5` is used. The value is clamped to the range 0 to 1 and rounded to two decimals.
-
-### 3. Reliability
-
-- **20-second timeout** on each AI request.
-- **Up to 3 attempts** with exponential backoff (1s, then 2s) for temporary failures: HTTP 429, 500, 503, 504, and network errors or timeouts.
-- **No retries** for permanent failures such as an invalid API key or wrong model name.
-- Failures are logged in the server console. The client only receives a generic `502` message so no provider details leak.
-
----
-
-## Testing
-
-With the server running, you can use curl (above), Postman, or any HTTP client.
-
-A Postman collection is included in `postman/`. Import it into Postman and send the saved requests (a Complaint, a Query, a Feedback example, and an invalid request).
-
----
-
-## Troubleshooting
-
-| Symptom                                   | Likely cause and fix                                                                                  |
-|-------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| Server exits with "Missing environment variables" | `.env` is missing or incomplete. Copy `.env.example` and fill it in.                          |
-| `502` and `status 503` in the server log  | The AI provider is overloaded. Wait and retry, or switch `AI_MODEL` to a lighter model.               |
-| `502` and `status 401/403` in the server log | Invalid API key. Check `AI_API_KEY`.                                                               |
-| `502` and `status 404` in the server log  | Wrong model name or base URL. Check `AI_MODEL` and `AI_BASE_URL`.                                     |
-| Changes to `.env` have no effect          | Restart the server. `.env` is only read at startup.                                                   |
-
----
 
 ## Tech Stack
 
