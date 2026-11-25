@@ -20,8 +20,10 @@ Built with **Node.js** and **Express**.
 
 ```
 .
-├── server.js                      # Entry point: loads env, validates config, starts server
-├── app.js                         # Express app: middleware, routes, error handlers
+├── postman/
+│   └── classification-api.postman_collection.json   # Postman collection
+├── server.js                      
+├── app.js                         #middleware, routes, error handlers
 ├── routes/
 │   └── classify.routes.js         # Defines POST /classify
 ├── controllers/

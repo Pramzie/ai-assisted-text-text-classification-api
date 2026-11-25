@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Text Classification API",
-    "description": "Requests for the AI-assisted text classification API. Start the server first (node server.js).",
+    "description": "Requests for the AI-assisted text classification API.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
