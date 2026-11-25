@@ -1,0 +1,74 @@
+{
+  "info": {
+    "name": "Text Classification API",
+    "description": "Requests for the AI-assisted text classification API. Start the server first (node server.js).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" }
+  ],
+  "item": [
+    {
+      "name": "Classify - Complaint",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"text\": \"My order arrived broken!\"}" },
+        "url": { "raw": "{{baseUrl}}/api/classify", "host": ["{{baseUrl}}"], "path": ["api", "classify"] }
+      }
+    },
+    {
+      "name": "Classify - Query",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"text\": \"How do I reset my password?\"}" },
+        "url": { "raw": "{{baseUrl}}/api/classify", "host": ["{{baseUrl}}"], "path": ["api", "classify"] }
+      }
+    },
+    {
+      "name": "Classify - Feedback",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"text\": \"Great app, please add dark mode.\"}" },
+        "url": { "raw": "{{baseUrl}}/api/classify", "host": ["{{baseUrl}}"], "path": ["api", "classify"] }
+      }
+    },
+    {
+      "name": "Classify - Other",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"text\": \"The weather is nice today.\"}" },
+        "url": { "raw": "{{baseUrl}}/api/classify", "host": ["{{baseUrl}}"], "path": ["api", "classify"] }
+      }
+    },
+    {
+      "name": "Error - Missing text",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{}" },
+        "url": { "raw": "{{baseUrl}}/api/classify", "host": ["{{baseUrl}}"], "path": ["api", "classify"] }
+      }
+    },
+    {
+      "name": "Error - Invalid JSON",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"text\": " },
+        "url": { "raw": "{{baseUrl}}/api/classify", "host": ["{{baseUrl}}"], "path": ["api", "classify"] }
+      }
+    },
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+      }
+    }
+  ]
+}

@@ -3,7 +3,6 @@
 A small backend service that classifies a piece of text as **Complaint**, **Query**, **Feedback** or **Other** using an AI model, and returns the category along with a confidence score.
 
 Built with **Node.js** and **Express**.
----
 
 ## Features
 
@@ -15,7 +14,7 @@ Built with **Node.js** and **Express**.
 - Clean separation of routes, controller, service and error handling
 - Environment-variable configuration, with a startup check for missing values
 
----
+
 
 ## Project Structure
 
@@ -35,7 +34,7 @@ Built with **Node.js** and **Express**.
 └── README.md
 ```
 
----
+
 
 ## Setup
 
@@ -61,10 +60,10 @@ cp .env.example .env
 
 | Variable      | Description                                                                 | Example                                                   |
 |---------------|-----------------------------------------------------------------------------|-----------------------------------------------------------|
-| `AI_API_KEY`  | API key for the AI provider                                                 | `your_api_key_here`                                       |
+| `AI_API_KEY`  | API key for the AI provider                                                 | `the api key`                                       |
 | `AI_BASE_URL` | Provider's OpenAI-compatible base URL (**without** `/chat/completions`)     | `https://generativelanguage.googleapis.com/v1beta/openai` |
-| `AI_MODEL`    | Model name exactly as the provider lists it                                 | `gemini-2.5-flash-lite`                                   |
-| `PORT`        | Port for the server (optional, defaults to `3000`)                          | `3000`                                                    |
+| `AI_MODEL`    | Model name                                 | `gemini-3.5-flash-lite`                                   |
+| `PORT`        | Port for the server, default is `3000`                          | `3000`                                                    |
 
 
 
@@ -80,7 +79,6 @@ In bash or terminal, we will see:
 Text Classification API running on http://localhost:3000
 ```
 
----
 
 ## API Reference
 
@@ -104,12 +102,6 @@ Content-Type: application/json
 
 ![alt text](POST_screenshot.png)
 
-```json
-{
-  "category": "Complaint",
-  "confidence": 0.95
-}
-```
 
 The `confidence` value comes from the model and will vary between texts and models.
 
@@ -124,14 +116,17 @@ The `confidence` value comes from the model and will vary between texts and mode
 
 ### `GET /health`
 
-Simple health check. Returns `{ "status": "ok" }`.
+Simple health check which returns `{ "status": "ok" }`.
+
 ![alt text](GET_screenshot.png)
 
 ### Error responses
 
 All errors return JSON in the form `{ "error": "<message>" }`.
 ![alt text](error_screenshot.png)
+
 The above error was fixed by changing the model.
+
 | Status | When it happens                                                        |
 |--------|------------------------------------------------------------------------|
 | 400    | Invalid JSON body, or `text` is missing or not a valid string          |
@@ -141,11 +136,10 @@ The above error was fixed by changing the model.
 
 Request bodies are limited to **10 KB**.
 
----
 
 ## How AI Was Used
 
-The classification itself is done by an AI model.T
+The classification itself is done by an AI model.
 
 The service sends two messages to the model's chat completions endpoint
 The prompt defines the four categories and what each one means, and tells the model to answer with only a JSON object:
@@ -161,15 +155,13 @@ The prompt defines the four categories and what each one means, and tells the mo
   | Feedback  | The sender shares an opinion, praise or a suggestion, with no problem or question |
   | Other     | Anything that does not fit the above                                        |
 
-Since AI replies can be messy the service validates them before returning.
-It extracts the JSON object from the model's reply and the model's own confidence is used when it is a valid number. If it is missing or invalid, a default of `0.5` is used. The value is clamped to the range 0 to 1 and rounded to two decimals.
+Since AI replies can be messy the service validates them before returning,it extracts the JSON object from the model's reply and the model's own confidence is used when it is a valid number. If it is missing or invalid, a default of `0.5` is used. The value is clamped to the range 0 to 1 and rounded to two decimals.
 
 
 
 
 ## Tech Stack
 
-- Node.js (18+)
+- Node.js 
 - Express
 - dotenv
-- Any OpenAI-compatible AI provider (tested with Google Gemini)
